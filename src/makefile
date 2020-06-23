@@ -1,4 +1,10 @@
-# 编译加了libpmem库的源文件时加上-l pmem参数进行编译
-# 在这个makefile中添加ycsb测试的相关编译命令，运行ycsb
+target : pm_ehash.o ycsb.o data_page.o
+	g++ -o target pm_ehash.o ycsb.o data_page.o -l pmem
 
-ycsb:
+pm_ehash.o : pm_ehash.cpp ../include/pm_ehash.h
+	g++ -c pm_ehash.cpp -o pm_ehash.o
+ycsb.o : ycsb.cpp ../include/pm_ehash.h
+	g++ -c ycsb.cpp -o ycsb.o
+data_page.o : data_page.cpp ../include/pm_ehash.h
+	g++ -c data_page.cpp -o data_page.o
+clean : target pm_ehash.o ycsb.o data_page.o

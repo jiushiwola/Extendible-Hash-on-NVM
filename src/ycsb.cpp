@@ -31,6 +31,11 @@ kv convert(uint64_t num) {
 }
 void test(const char* load, const char* run) {
     PmEHash t;
+    clock_t start, finish;
+    double  duration;
+    /* 测量一个事件持续的时间*/
+
+    start = clock();
     ifstream in(load, ios::in);
     while(in >> op) {
 
@@ -41,25 +46,28 @@ void test(const char* load, const char* run) {
 
     }
     in.close();
-    clock_t start, finish;
-    double  duration;
-    /* 测量一个事件持续的时间*/
-
+    finish = clock();
+    duration = (double)(finish - start) / CLOCKS_PER_SEC;
+    printf( "run time of %s : %f seconds\n", load, duration );
     start = clock();
-
     in.open(run);
     uint64_t temp;
+    int op_count = 0, read_count = 0, update_count = 0, insert_count = 0;
     while(in >> op) {
+        op_count++;
         in >> num;
         if (op == "UPDATE") {
+            update_count++;
             kv key_and_val = convert(num);
             t.update(key_and_val);
         }
         else if (op == "READ") {
+            read_count++;
             kv key_and_val = convert(num);
             t.search(key_and_val.key, temp);
         }
         else if (op == "INSERT"){
+            insert_count++;
             kv key_and_val = convert(num);
             t.insert(key_and_val);
         }
@@ -72,6 +80,10 @@ void test(const char* load, const char* run) {
     finish = clock();
     duration = (double)(finish - start) / CLOCKS_PER_SEC;
     printf( "run time of %s : %f seconds\n", run, duration );
+    printf("op_count: %d\n", op_count);
+    printf("ops: %f\n", double(op_count) / duration);
+    printf("INSERT: %f\nUPDATE: %f\nREAD: %f\n\n", double(insert_count) / double(op_count), double(update_count) / double(op_count), double(read_count) / double(op_count));
+
     t.selfDestroy();
 }
 int main() {
